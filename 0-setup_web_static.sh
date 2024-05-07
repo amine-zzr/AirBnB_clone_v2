@@ -20,10 +20,9 @@ sudo ln -sf /data/web_static/releases/test/ /data/web_static/current
 sudo chown -R ubuntu:ubuntu /data/
 
 # Configure Nginx to listen on port 80 and return "Hello World!"
-echo 'server {
+echo "server {
         listen 80 default_server;
         listen [::]:80 default_server;
-        add_header X-Served-By $hostname;
 
         root /var/www/html;
         index index.html;
@@ -32,7 +31,7 @@ echo 'server {
                 alias /data/web_static/current;
                 index index.html;
         }
-}' > /etc/nginx/sites-available/default
+}" > /etc/nginx/sites-available/default
 
 #Restart Nginx to apply changes
 service nginx restart
