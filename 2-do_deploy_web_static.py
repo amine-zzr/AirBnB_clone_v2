@@ -36,4 +36,5 @@ def do_deploy(archive_path):
     # Create a new symbolic link linked to the new version of the code
     run(f'ln -s {release_folder} /data/web_static/current')
 
+    print("New version deployed!")
     return True
