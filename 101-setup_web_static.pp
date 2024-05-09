@@ -1,28 +1,72 @@
 # Reding the task 0 but by using Puppet
-exec { 'apt-get-update':
-  command => '/usr/bin/env apt-get -y update',
+# Update package list and install Nginx
+exec { 'apt-update':
+  command => '/usr/bin/apt update',
+  path    => '/usr/bin/',
+  unless  => '/usr/bin/test -e /var/lib/apt/periodic/update-success-stamp',
 }
--> exec {'nginx':
-  command => '/usr/bin/env apt-get -y install nginx',
+
+package { 'nginx':
+  ensure  => installed,
+  require => Exec['apt-update'],
 }
--> exec {'test folder':
-  command => '/usr/bin/env mkdir -p /data/web_static/releases/test/',
+
+# Create necessary directories if they don't exist
+file { '/data/web_static/releases/test':
+  ensure  => directory,
+  owner   => 'ubuntu',
+  group   => 'ubuntu',
+  mode    => '0755',
+  require => Package['nginx'],
 }
--> exec {'shared folder':
-  command => '/usr/bin/env mkdir -p /data/web_static/shared/',
+
+file { '/data/web_static/shared':
+  ensure  => directory,
+  owner   => 'ubuntu',
+  group   => 'ubuntu',
+  mode    => '0755',
+  require => Package['nginx'],
 }
--> exec {'index':
-  command => '/usr/bin/env echo "ALX/Holberton School" > /data/web_static/releases/test/index.html',
+
+# Create a fake HTML file for testing
+file { '/data/web_static/releases/test/index.html':
+  ensure  => file,
+  content => "<html>\n<head>\n</head>\n<body>\n  ALX School\n</body>\n</html>\n",
+  owner   => 'ubuntu',
+  group   => 'ubuntu',
+  mode    => '0644',
+  require => [
+    File['/data/web_static/releases/test'],
+    Package['nginx'],
+  ],
 }
--> exec {'ln -s':
-  command => '/usr/bin/env ln -sf /data/web_static/releases/test /data/web_static/current',
+
+# Create symbolic link and update ownership
+file { '/data/web_static/current':
+  ensure  => link,
+  target  => '/data/web_static/releases/test/',
+  owner   => 'ubuntu',
+  group   => 'ubuntu',
+  require => [
+    File['/data/web_static/releases/test/index.html'],
+    Package['nginx'],
+  ],
 }
--> exec {'nginx conf':
-  command => '/usr/bin/env sed -i "/listen 80 default_server/a location /hbnb_static/ { alias /data/web_static/current/;}" /etc/nginx/sites-available/default',
+
+# Configure Nginx to listen on port 80 and return "Hello World!"
+file { '/etc/nginx/sites-available/default':
+  ensure  => file,
+  content => "server {\n    listen 80 default_server;\n    listen [::]:80 default_server;\n\n    root /var/www/html;\n    index index.html;\n\n    location /hbnb_static {\n        alias /data/web_static/current;\n        index index.html;\n    }\n}\n",
+  owner   => 'root',
+  group   => 'root',
+  mode    => '0644',
+  require => File['/data/web_static/current'],
+  notify  => Service['nginx'],
 }
--> exec {'chown:':
-  command => '/usr/bin/env chown -R ubuntu:ubuntu /data',
-}
--> exec {'service':
-  command => '/usr/bin/env service nginx restart',
+
+# Restart Nginx to apply changes
+service { 'nginx':
+  ensure  => running,
+  enable  => true,
+  require => File['/etc/nginx/sites-available/default'],
 }
