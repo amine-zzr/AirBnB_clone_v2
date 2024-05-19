@@ -95,7 +95,6 @@ class FileStorage:
         objs = self.all(cls)
         return len(objs) if objs is not None else 0
 
-
     def close(self):
         '''call reload() method for deserializing the JSON file'''
         self.reload()
