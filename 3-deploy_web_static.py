@@ -4,7 +4,7 @@
 from fabric.api import env, put, run, local
 import os
 from datetime import datetime
-env.hosts = ['100.26.133.151', '100.25.168.188']
+env.hosts = ['54.227.195.180', '34.239.255.131']
 
 
 def do_pack():
