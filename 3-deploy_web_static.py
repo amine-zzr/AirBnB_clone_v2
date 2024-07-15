@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-'''Orchestrates the archive creation and deployment process.'''
+'''Orchestrates the archive creation and deployment process. '''
 
 from fabric.api import env, put, run, local
 import os
