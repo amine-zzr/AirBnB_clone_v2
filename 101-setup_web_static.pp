@@ -1,4 +1,4 @@
-# Reding the task 0 but by using Puppet
+# Redoing the task 0 but by using Puppet
 # Update package list and install Nginx
 exec { 'apt-update':
   command => '/usr/bin/apt update',
